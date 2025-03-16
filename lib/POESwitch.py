@@ -39,6 +39,16 @@ class POESwitch:
          raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
       return self.poectrl[int(index/4)].port_power(index%4)
 
+   def port_class(self, index):
+      if index not in range(4 * len(self.poectrl)):
+         raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
+      return self.poectrl[int(index/4)].port_class(index%4)
+
+   def port_detection(self, index):
+      if index not in range(4 * len(self.poectrl)):
+         raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
+      return self.poectrl[int(index/4)].port_detection(index%4)
+   
    def voltage_in(self, index):
       if index not in range(len(self.poectrl)):
          raise IndexError(f"controller index must inside [0...{len(self.poectrl)}] range")
@@ -55,8 +65,11 @@ class POESwitch:
          print(f"POE ctrl: {i:2>}\tvoltage: {ctrl.voltage_in():5}V\t temperature: {ctrl.temperature():5}C")
          for port in range(4*i,(4*i)+4):
             s = f"\tport: {port}\t {'ON' if self.port_status(port) else 'OFF':>3} | " + \
-               f"voltage: {self.port_voltage(port):5}V | " + \
+               f"class: {self.port_class(port)} | " + \
+               f"detection: {self.port_detection(port)}\n" + \
+               f"\t\tvoltage: {self.port_voltage(port):5}V | " + \
                f"current: {self.port_current(port):5}mA | " + \
                f"power: {self.port_power(port):5}W"
-            print(s)
+            print(f"{s}\n")
          i += 1
+         print()

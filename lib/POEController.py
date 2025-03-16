@@ -3,12 +3,51 @@ from smbus2 import SMBus
 
 class POEController:
 
+   REG_PORT_CLASS_DETECT_STATUS = 0x0C
    REG_PORT_MODE = 0x12
    REG_DETECT_CLASS_ENABLE = 0x14
    REG_TEMPERATURE = 0x2C
    REG_VPWR_LSB = 0x2E
    REG_PORT1_CURRENT_LSB = 0x30
    REG_PORT1_VOLTAGE_LSB = 0x32
+
+   poe_class_str = [
+      "unknown",
+      "Class 1",
+      "Class 2",
+      "Class 3",
+      "Class 4",
+      "---",
+      "Class 0",
+      "overcurrent",
+      "Class 5 4P Single Signature",
+      "---",
+      "---",
+      "---",
+      "Class 4 Type 1 Limited",
+      "Class 5 Legacy",
+      "---",
+      "Class Mismatch"
+   ]
+
+   poe_detection_str = [
+      "unknown",
+      "short circuit",
+      "capacitive",
+      "RLOW",
+      "RGOOD",
+      "RHIGH",
+      "open circuit",
+      "PSE to PSE",
+      "---",
+      "---",
+      "---",
+      "---",
+      "---",
+      "---",
+      "---",
+      "mosfet fault"
+   ]
 
    def __init__(self, i2c_bus, i2c_addr):
       self.i2c_addr = i2c_addr
@@ -64,6 +103,18 @@ class POEController:
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
       return round(float(self.port_voltage(port) * self.port_current(port) / 1000.0), 2)
+
+   def port_class(self, port):
+      if port not in range(4):
+         raise IndexError("port index must be inside [0...3] range")
+      poeclass = (self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + port) & (0xF0)) >> 4
+      return self.poe_class_str[poeclass] 
+
+   def port_detection(self, port):
+      if port not in range(4):
+         raise IndexError("port index must be inside [0...3] range")
+      poedet = self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + port) & (0x0F)
+      return self.poe_detection_str[poedet] 
 
    def temperature(self):
       value = self.read_register(self.REG_TEMPERATURE)
