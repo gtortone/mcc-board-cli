@@ -3,6 +3,10 @@ from smbus2 import SMBus
 
 class SFP:
 
+   REG_VENDOR = 0x14
+   REG_MODEL = 0x28
+   REG_SERIAL = 0x44
+   REG_DATECODE = 0x54
    REG_TEMPERATURE = 0x60
    REG_VCC = 0x62
    REG_TXBIAS = 0x64
@@ -19,6 +23,22 @@ class SFP:
       except:
          return False
       return True
+
+   def vendor(self):
+      vendor = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_VENDOR, 16)
+      return str.rstrip(''.join(map(chr, vendor)))
+
+   def model(self):
+      model = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_MODEL, 20)
+      return str.rstrip(''.join(map(chr, model)))
+
+   def serial(self):
+      serial = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_SERIAL, 16)
+      return str.rstrip(''.join(map(chr, serial)))
+
+   def datecode(self):
+      datecode = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_DATECODE, 8)
+      return str.rstrip(''.join(map(chr, datecode)))
 
    def temperature(self):
       tlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TEMPERATURE, 2)

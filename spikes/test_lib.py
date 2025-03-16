@@ -65,37 +65,28 @@ print(sw.temperature(0))
 
 sw.print()
 
-### SFP 0
+### SFP 
 
-isw1.select(3)
-isw2.select(2)
+sfp_id = 0
+for mux_channel in [2, 1]:
 
-sfp = SFP(I2C_BUS, I2C_SFP_ADDR)
+   isw1.select(3)
+   isw2.select(mux_channel)
 
-print("SFP 0")
-if sfp.is_available():
-   print(f"\tvoltage: {sfp.voltage()}V")
-   print(f"\ttemperature: {sfp.temperature()}C")
-   print(f"\ttx bias: {sfp.tx_bias()}mA")
-   print(f"\ttx power: {sfp.tx_power()}uW")
-   print(f"\trx power: {sfp.rx_power()}uW")
-else:
-   print("\tnot available")
+   sfp = SFP(I2C_BUS, I2C_SFP_ADDR)
 
-#### SFP 1
+   print(f"SFP {sfp_id}")
+   if sfp.is_available():
+      print(f"\tvendor: {sfp.vendor()}")
+      print(f"\tmodel: {sfp.model()}")
+      print(f"\tserial: {sfp.serial()}")
+      print(f"\tdatecode: {sfp.datecode()}")
+      print(f"\tvoltage: {sfp.voltage()}V")
+      print(f"\ttemperature: {sfp.temperature()}C")
+      print(f"\ttx bias: {sfp.tx_bias()}mA")
+      print(f"\ttx power: {sfp.tx_power()}uW")
+      print(f"\trx power: {sfp.rx_power()}uW")
+   else:
+      print("\tnot available")
 
-isw1.select(3)
-isw2.select(1)
-
-sfp = SFP(I2C_BUS, I2C_SFP_ADDR)
-
-print("SFP 1")
-if sfp.is_available():
-   print(f"\tvoltage: {sfp.voltage()}V")
-   print(f"\ttemperature: {sfp.temperature()}C")
-   print(f"\ttx bias: {sfp.tx_bias()}mA")
-   print(f"\ttx power: {sfp.tx_power()}uW")
-   print(f"\trx power: {sfp.rx_power()}uW")
-else:
-   print("\tnot available")
-
+   sfp_id += 1
