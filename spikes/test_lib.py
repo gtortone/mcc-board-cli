@@ -3,6 +3,7 @@
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+from functools import partial
 
 from lib.I2CSwitch import I2CSwitch
 from lib.POEController import POEController
@@ -39,30 +40,16 @@ I2C_SFP_ADDR = 0x50
 isw1 = I2CSwitch(I2C_BUS, I2C_SW1_ADDR)
 isw2 = I2CSwitch(I2C_BUS, I2C_SW0_ADDR)
 
-pc1 = POEController(I2C_BUS, I2C_POE0_ADDR)
-pc2 = POEController(I2C_BUS, I2C_POE1_ADDR)
+pc1 = POEController(I2C_BUS, I2C_POE0_ADDR, (partial(isw1.select, 3), partial(isw2.select, 0)))
+pc2 = POEController(I2C_BUS, I2C_POE1_ADDR, (partial(isw1.select, 3), partial(isw2.select, 0)))
 
 ### POE
-
-isw1.select(3)
-isw2.select(0)
 
 sw = POESwitch()
 sw.add_controller(pc1)
 sw.add_controller(pc2)
 
-print(sw.port_status(0))
-print(sw.port_status(1))
-try:
-   print(sw.port_on(9))
-except:
-   print("index error")
-
-print(sw.port_voltage(0))
-
-print(sw.voltage_in(0))
-print(sw.temperature(0))
-
+print()
 sw.print()
 
 ### SFP 
@@ -70,10 +57,7 @@ sw.print()
 sfp_id = 0
 for mux_channel in [2, 1]:
 
-   isw1.select(3)
-   isw2.select(mux_channel)
-
-   sfp = SFP(I2C_BUS, I2C_SFP_ADDR)
+   sfp = SFP(I2C_BUS, I2C_SFP_ADDR, (partial(isw1.select, 3), partial(isw2.select, mux_channel)))
 
    print(f"SFP {sfp_id}")
    if sfp.is_available():
@@ -90,3 +74,4 @@ for mux_channel in [2, 1]:
       print("\tnot available")
 
    sfp_id += 1
+

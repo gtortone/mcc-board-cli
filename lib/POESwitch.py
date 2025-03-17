@@ -72,4 +72,3 @@ class POESwitch:
                f"power: {self.port_power(port):5}W"
             print(f"{s}\n")
          i += 1
-         print()

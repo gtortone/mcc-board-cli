@@ -49,14 +49,21 @@ class POEController:
       "mosfet fault"
    ]
 
-   def __init__(self, i2c_bus, i2c_addr):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=()):
       self.i2c_addr = i2c_addr
+      self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
 
+   def select(self):
+      for func in self.i2c_select:
+         func()
+
    def read_register(self, reg_addr):
+      self.select()
       return self.bus.read_byte_data(self.i2c_addr, reg_addr)
 
    def write_register(self, reg_addr, value):
+      self.select()
       self.bus.write_byte_data(self.i2c_addr, reg_addr, value)
       
    def port_on(self, port):
@@ -87,6 +94,7 @@ class POEController:
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
       addr = self.REG_PORT1_VOLTAGE_LSB + (port * 4)
+      self.select()
       vlist = self.bus.read_i2c_block_data(self.i2c_addr, addr, 2)
       voltage = vlist[0] + (vlist[1] << 8)
       return round(float(60 * voltage / 16384.0), 2)
@@ -95,6 +103,7 @@ class POEController:
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
       addr = self.REG_PORT1_CURRENT_LSB + (port * 4)
+      self.select()
       clist = self.bus.read_i2c_block_data(self.i2c_addr, addr, 2)
       current = clist[0] + (clist[1] << 8)
       return round(float(1000 * current / 16384.0), 2)
@@ -122,6 +131,7 @@ class POEController:
       return t
 
    def voltage_in(self):
+      self.select()
       value = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_VPWR_LSB, 2)
       value = value[0] + (value[1] << 8)
       return round(float((value * 60) / 16384.0), 2)

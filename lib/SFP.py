@@ -13,11 +13,17 @@ class SFP:
    REG_TXPOWER = 0x66
    REG_RXPOWER = 0x68
 
-   def __init__(self, i2c_bus, i2c_addr):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=()):
       self.i2c_addr = i2c_addr
+      self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
 
+   def select(self):
+      for func in self.i2c_select:
+         func()
+
    def is_available(self):
+      self.select()
       try:
          self.bus.read_byte_data(self.i2c_addr, 0x00)
       except:
@@ -25,42 +31,51 @@ class SFP:
       return True
 
    def vendor(self):
+      self.select()
       vendor = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_VENDOR, 16)
       return str.rstrip(''.join(map(chr, vendor)))
 
    def model(self):
+      self.select()
       model = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_MODEL, 20)
       return str.rstrip(''.join(map(chr, model)))
 
    def serial(self):
+      self.select()
       serial = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_SERIAL, 16)
       return str.rstrip(''.join(map(chr, serial)))
 
    def datecode(self):
+      self.select()
       datecode = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_DATECODE, 8)
       return str.rstrip(''.join(map(chr, datecode)))
 
    def temperature(self):
+      self.select()
       tlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TEMPERATURE, 2)
       temp = (tlist[0] << 8) + tlist[1]
       return round(float(temp * 1/256), 2)   # LSB = 1/256 C
       
    def voltage(self):
+      self.select()
       vlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_VCC, 2)
       voltage = (vlist[0] << 8) + vlist[1]
       return round(float(voltage * 1E-4), 2)  # LSB = 100 uV
 
    def tx_bias(self):
+      self.select()
       blist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXBIAS, 2)
       bias = (blist[0] << 8) + blist[1]
       return round(float(bias * 2)/1000.0, 2)  # LSB = 2 uA
 
    def tx_power(self):
+      self.select()
       plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXPOWER, 2)
       power = (plist[0] << 8) + plist[1]
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
 
    def rx_power(self):
+      self.select()
       plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_RXPOWER, 2)
       power = (plist[0] << 8) + plist[1]
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
