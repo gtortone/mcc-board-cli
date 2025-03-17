@@ -79,3 +79,15 @@ class SFP:
       plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_RXPOWER, 2)
       power = (plist[0] << 8) + plist[1]
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
+
+   def print(self):
+      print(f"vendor: {self.vendor()}")
+      print(f"model: {self.model()}")
+      print(f"serial: {self.serial()}")
+      print(f"datecode: {self.datecode()}")
+      print(f"voltage: {self.voltage()}V")
+      print(f"temperature: {self.temperature()}C")
+      print(f"tx bias: {self.tx_bias()}mA")
+      print(f"tx power: {self.tx_power()}uW")
+      print(f"rx power: {self.rx_power()}uW")
+
