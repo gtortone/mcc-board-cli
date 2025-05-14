@@ -52,31 +52,46 @@ class SFP:
 
    def temperature(self):
       self.select()
-      tlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TEMPERATURE, 2)
+      try:
+         tlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TEMPERATURE, 2)
+      except:
+         return None
       temp = (tlist[0] << 8) + tlist[1]
       return round(float(temp * 1/256), 2)   # LSB = 1/256 C
       
    def voltage(self):
       self.select()
-      vlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_VCC, 2)
+      try:
+         vlist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_VCC, 2)
+      except:
+         return None
       voltage = (vlist[0] << 8) + vlist[1]
       return round(float(voltage * 1E-4), 2)  # LSB = 100 uV
 
    def tx_bias(self):
       self.select()
-      blist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXBIAS, 2)
+      try:
+         blist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXBIAS, 2)
+      except:
+         return None
       bias = (blist[0] << 8) + blist[1]
       return round(float(bias * 2)/1000.0, 2)  # LSB = 2 uA
 
    def tx_power(self):
       self.select()
-      plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXPOWER, 2)
+      try:
+         plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_TXPOWER, 2)
+      except:
+         return None
       power = (plist[0] << 8) + plist[1]
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
 
    def rx_power(self):
       self.select()
-      plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_RXPOWER, 2)
+      try:
+         plist = self.bus.read_i2c_block_data(self.i2c_addr+1, self.REG_RXPOWER, 2)
+      except: 
+         return None
       power = (plist[0] << 8) + plist[1]
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
 
@@ -85,9 +100,9 @@ class SFP:
       print(f"model: {self.model()}")
       print(f"serial: {self.serial()}")
       print(f"datecode: {self.datecode()}")
-      print(f"voltage: {self.voltage()}V")
-      print(f"temperature: {self.temperature()}C")
-      print(f"tx bias: {self.tx_bias()}mA")
-      print(f"tx power: {self.tx_power()}uW")
-      print(f"rx power: {self.rx_power()}uW")
+      self.voltage() and print(f"voltage: {self.voltage()}V")
+      self.temperature() and print(f"temperature: {self.temperature()}C")
+      self.tx_bias() and print(f"tx bias: {self.tx_bias()}mA")
+      self.tx_power() and print(f"tx power: {self.tx_power()}uW")
+      self.rx_power() and print(f"rx power: {self.rx_power()}uW")
 
