@@ -3,6 +3,7 @@ from smbus2 import SMBus
 
 class SFP:
 
+   REG_CONNECTOR_TYPE = 0x02
    REG_VENDOR = 0x14
    REG_MODEL = 0x28
    REG_SERIAL = 0x44
@@ -12,6 +13,8 @@ class SFP:
    REG_TXBIAS = 0x64
    REG_TXPOWER = 0x66
    REG_RXPOWER = 0x68
+
+   LC_CONNECTOR_TYPE = 0x07
 
    def __init__(self, i2c_bus, i2c_addr, i2c_select=()):
       self.i2c_addr = i2c_addr
@@ -29,6 +32,11 @@ class SFP:
       except:
          return False
       return True
+
+   def connector_type(self):
+      self.select() 
+      conn = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_CONNECTOR_TYPE, 1);
+      return conn[0]
 
    def vendor(self):
       self.select()
@@ -100,9 +108,10 @@ class SFP:
       print(f"model: {self.model()}")
       print(f"serial: {self.serial()}")
       print(f"datecode: {self.datecode()}")
-      self.voltage() and print(f"voltage: {self.voltage()}V")
-      self.temperature() and print(f"temperature: {self.temperature()}C")
-      self.tx_bias() and print(f"tx bias: {self.tx_bias()}mA")
-      self.tx_power() and print(f"tx power: {self.tx_power()}uW")
-      self.rx_power() and print(f"rx power: {self.rx_power()}uW")
+      if(self.connector_type() == self.LC_CONNECTOR_TYPE):
+         print(f"voltage: {self.voltage()}V")
+         print(f"temperature: {self.temperature()}C")
+         print(f"tx bias: {self.tx_bias()}mA")
+         print(f"tx power: {self.tx_power()}uW")
+         print(f"rx power: {self.rx_power()}uW")
 
