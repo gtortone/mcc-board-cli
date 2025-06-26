@@ -115,3 +115,17 @@ class SFP:
          print(f"tx power: {self.tx_power()}uW")
          print(f"rx power: {self.rx_power()}uW")
 
+   def as_dict(self):
+      d = {}
+      d["vendor"] = self.vendor()
+      d["model"] = self.model()
+      d["serial"] = self.serial()
+      d["datecode"] = self.datecode()
+      if(self.connector_type() == self.LC_CONNECTOR_TYPE):
+         d["voltage"] = self.voltage()
+         d["temperature"] = self.temperature()
+         d["tx bias"] = self.tx_bias()
+         d["tx power"] = self.tx_power()
+         d["rx power"] = self.rx_power()
+
+      return d

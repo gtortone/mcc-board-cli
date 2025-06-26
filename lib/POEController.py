@@ -135,3 +135,10 @@ class POEController:
       value = self.bus.read_i2c_block_data(self.i2c_addr, self.REG_VPWR_LSB, 2)
       value = value[0] + (value[1] << 8)
       return round(float((value * 60) / 16384.0), 2)
+
+   def as_dict(self):
+      d = {}
+      d["voltage"] = self.voltage_in()
+      d["temperature"] = self.temperature()
+      
+      return d

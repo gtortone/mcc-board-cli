@@ -72,3 +72,18 @@ class POESwitch:
                f"power: {self.port_power(port):5}W"
             print(f"{s}\n")
          i += 1
+
+   def as_dict(self, index):
+      c = int(index/4)
+      p = index % 4
+      d = {}
+      d["id"] = index
+      d["status"] = 'on' if self.poectrl[c].port_status(p) else 'off'
+      d["class"] = self.poectrl[c].port_class(p)
+      d["detection"] = self.poectrl[c].port_detection(p)
+      d["voltage"] = self.poectrl[c].port_voltage(p)
+      d["current"] = self.poectrl[c].port_current(p)
+      d["power"] = self.poectrl[c].port_power(p)
+
+      return d
+      
