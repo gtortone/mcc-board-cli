@@ -124,8 +124,8 @@ class SFP:
       if(self.connector_type() == self.LC_CONNECTOR_TYPE):
          d["voltage"] = self.voltage()
          d["temperature"] = self.temperature()
-         d["tx bias"] = self.tx_bias()
-         d["tx power"] = self.tx_power()
-         d["rx power"] = self.rx_power()
+         d["txbias"] = self.tx_bias()
+         d["txpower"] = self.tx_power()
+         d["rxpower"] = self.rx_power()
 
       return d
