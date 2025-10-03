@@ -5,6 +5,7 @@ from lib.I2CSwitch import I2CSwitch
 from lib.POEController import POEController
 from lib.POESwitch import POESwitch
 from lib.SFP import SFP
+from lib.FPGARegister import FPGARegister
 
 """
 I2C switch 0x72
@@ -48,3 +49,4 @@ class MCCBoard:
       self.sfp1 = SFP(self.I2C_BUS, self.I2C_SFP_ADDR, 
          (partial(isw1.select, 3), partial(isw2.select, 1)))
 
+      self.fpga = FPGARegister('/dev/uio0')
