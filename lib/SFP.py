@@ -1,4 +1,5 @@
 
+import gpiod
 from smbus2 import SMBus
 
 class SFP:
@@ -16,14 +17,28 @@ class SFP:
 
    LC_CONNECTOR_TYPE = 0x07
 
-   def __init__(self, i2c_bus, i2c_addr, i2c_select=()):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), chip=None, line=None):
       self.i2c_addr = i2c_addr
       self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
+      if (chip is not None and line is not None):
+         self.chip = gpiod.Chip(chip)
+         self.line = self.chip.get_line(line)
+         self.line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_OUT)
+      else:
+         self.chip = self.line = None
 
    def select(self):
       for func in self.i2c_select:
          func()
+
+   def on(self):
+      if self.chip is not None:
+        self.line.set_value(1)
+
+   def off(self):
+      if self.chip is not None:
+        self.line.set_value(0)
 
    def is_available(self):
       self.select()
