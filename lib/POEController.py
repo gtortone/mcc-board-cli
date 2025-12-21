@@ -5,6 +5,7 @@ class POEController:
 
    REG_PORT_CLASS_DETECT_STATUS = 0x0C
    REG_PORT_MODE = 0x12
+   REG_DISCONNECT_ENABLE = 0x13
    REG_DETECT_CLASS_ENABLE = 0x14
    REG_TEMPERATURE = 0x2C
    REG_VPWR_LSB = 0x2E
@@ -49,10 +50,17 @@ class POEController:
       "mosfet fault"
    ]
 
-   def __init__(self, i2c_bus, i2c_addr, i2c_select=()):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), portmap=[]):
       self.i2c_addr = i2c_addr
       self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
+      if len(portmap) == 0:
+         self.portmap = [0, 1, 2, 3]
+      else:
+         self.portmap = portmap
+
+      self.select()
+      self.bus.write_byte_data(self.i2c_addr, self.REG_DISCONNECT_ENABLE, 0)
 
    def select(self):
       for func in self.i2c_select:
@@ -69,7 +77,7 @@ class POEController:
    def port_on(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      mask = 0x03 << (port * 2)
+      mask = 0x03 << (self.portmap.index(port) * 2)
       regval = self.read_register(self.REG_PORT_MODE)
       regval |= mask
       self.write_register(self.REG_PORT_MODE, regval)
@@ -78,7 +86,7 @@ class POEController:
    def port_off(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      mask = 0x03 << (port * 2)
+      mask = 0x03 << (self.portmap.index(port) * 2)
       regval = self.read_register(self.REG_PORT_MODE)
       regval &= ~mask
       self.write_register(self.REG_PORT_MODE, regval)
@@ -88,12 +96,12 @@ class POEController:
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
       value = self.read_register(self.REG_PORT_MODE)
-      return bool(value & (0x03 << (port * 2)))
+      return bool(value & (0x03 << (self.portmap.index(port) * 2)))
 
    def port_voltage(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      addr = self.REG_PORT1_VOLTAGE_LSB + (port * 4)
+      addr = self.REG_PORT1_VOLTAGE_LSB + (self.portmap.index(port) * 4)
       self.select()
       vlist = self.bus.read_i2c_block_data(self.i2c_addr, addr, 2)
       voltage = vlist[0] + (vlist[1] << 8)
@@ -102,7 +110,7 @@ class POEController:
    def port_current(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      addr = self.REG_PORT1_CURRENT_LSB + (port * 4)
+      addr = self.REG_PORT1_CURRENT_LSB + (self.portmap.index(port) * 4)
       self.select()
       clist = self.bus.read_i2c_block_data(self.i2c_addr, addr, 2)
       current = clist[0] + (clist[1] << 8)
@@ -116,13 +124,13 @@ class POEController:
    def port_class(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      poeclass = (self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + port) & (0xF0)) >> 4
+      poeclass = (self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + self.portmap.index(port)) & (0xF0)) >> 4
       return self.poe_class_str[poeclass] 
 
    def port_detection(self, port):
       if port not in range(4):
          raise IndexError("port index must be inside [0...3] range")
-      poedet = self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + port) & (0x0F)
+      poedet = self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + self.portmap.index(port)) & (0x0F)
       return self.poe_detection_str[poedet] 
 
    def temperature(self):

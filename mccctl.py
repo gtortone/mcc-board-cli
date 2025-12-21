@@ -29,6 +29,9 @@ class App(cmd2.Cmd):
    sfp_subparser = sfp_parser.add_subparsers(title='subcommands', help='subcommand help')
 
    sfp_info_parser = sfp_subparser.add_parser('info', help='print SFP info')
+   sfp_port_parser = sfp_subparser.add_parser('port')
+   sfp_port_parser.add_argument('num', type=int, help='port number')
+   sfp_port_parser.add_argument('command', choices=['on','off','info'], help='command')
 
    # reg
    reg_parser = cmd2.Cmd2ArgumentParser()
@@ -63,19 +66,22 @@ class App(cmd2.Cmd):
       self.mcc.sw.print()
 
    def sfpinfo(self, args):
+      for i in range(3):
+         print()
+         print(f"SFP #{i}")
+         if self.mcc.sfp[i].is_available():
+            self.mcc.sfp[i].print()
+         else:
+            print("not available")
       print()
-      print("SFP #0")
-      if self.mcc.sfp0.is_available():
-         self.mcc.sfp0.print()
-      else:
-         print("not available")
-      print()
-      print("SFP #1")
-      if self.mcc.sfp1.is_available():
-         self.mcc.sfp1.print()
-      else:
-         print("not available")
-      print()
+
+   def sfpport(self, args):
+      if args.command == 'on':
+         print(f"turn on SFP {args.num}")
+         self.mcc.sfp[args.num].on()
+      elif args.command == 'off':
+         print(f"turn off SFP {args.num}")
+         self.mcc.sfp[args.num].off() 
 
    def regread(self, args):
       addr = int(args.address, 0)
@@ -94,6 +100,7 @@ class App(cmd2.Cmd):
    sw_port_parser.set_defaults(func=swport)
    sw_info_parser.set_defaults(func=swinfo)
    sfp_info_parser.set_defaults(func=sfpinfo)
+   sfp_port_parser.set_defaults(func=sfpport)
    reg_read_parser.set_defaults(func=regread)
    reg_write_parser.set_defaults(func=regwrite)
 
