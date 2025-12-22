@@ -24,7 +24,7 @@ class SFP:
       if (chip is not None and line is not None):
          self.chip = gpiod.Chip(chip)
          self.line = self.chip.get_line(line)
-         self.line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_OUT)
+         self.line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
       else:
          self.chip = self.line = None
 
