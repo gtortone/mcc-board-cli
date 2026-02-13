@@ -25,6 +25,7 @@ def main():
 
    if args.write is None and args.verify is None:
       parser.print_help()
+      sys.exit(0)
    elif args.write:
       filename = args.write
    elif args.verify:
