@@ -4,11 +4,11 @@ import gpiod
 import select
 
 # input pin
-IN_GPIO_BANK = 5
+IN_GPIO_BANK = 4
 IN_GPIO_LINE = 46    # PLL_LOL PS_MIO46
 
 # output pin
-OUT_GPIO_BANK = 4
+OUT_GPIO_BANK = 9
 OUT_GPIO_LINE = 2    # PLL_LOCK 
 
 # led pin
