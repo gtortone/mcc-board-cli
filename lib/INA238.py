@@ -42,7 +42,7 @@ class INA238:
    def read_register_24(self, reg):
       self.select()
       data = self.bus.read_i2c_block_data(self.i2c_addr, reg, 3)
-      return (data[0] << 16) | (data[1] << 8) | data[0]
+      return (data[0] << 16) | (data[1] << 8) | data[2]
 
    def write_register(self, reg, value):
       data = [(value >> 8) & 0xFF, value & 0xFF]
