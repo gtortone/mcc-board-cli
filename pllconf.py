@@ -21,7 +21,18 @@ def main():
 
    parser.add_argument("-w", "--write", type=str, required=False, help="write configuration")
    parser.add_argument("-v", "--verify", type=str, required=False, help="verify configuration")
+   parser.add_argument("-r", "--reset", action="store_true", required=False, help="reset PLL")
    args = parser.parse_args()
+
+   isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "gpiochip1", 0)
+   isw.reset()
+
+   pll = Si5345(I2C_BUS , SI5342_I2C_ADDR, (partial(isw.select, SI5342_MUX_CHANNEL),))
+
+   if args.reset:
+      pll.reset()
+      print("I: PLL RESET done")
+      sys.exit(0)
 
    if args.write is None and args.verify is None:
       parser.print_help()
@@ -30,11 +41,6 @@ def main():
       filename = args.write
    elif args.verify:
       filename = args.verify
-
-   isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "gpiochip1", 0)
-   isw.reset()
-
-   pll = Si5345(I2C_BUS , SI5342_I2C_ADDR, (partial(isw.select, SI5342_MUX_CHANNEL),))
 
    try:
       f = open(filename, "r", encoding="utf-8")
