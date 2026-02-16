@@ -3,6 +3,8 @@
 import argparse
 import time
 import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from lib.I2CSwitch import I2CSwitch
 from lib.Si5345 import Si5345

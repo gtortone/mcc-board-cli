@@ -12,7 +12,11 @@ class App(cmd2.Cmd):
       super().__init__(persistent_history_file='~/.mccctl_history', persistent_history_length=100)
       self.prompt = "MCC> "
 
-   mcc = MCCBoard()
+   if((mcc_ver := os.environ.get('MCC_MAJOR_VER')) is None):
+      print("E: MCC_MAJOR_VER env variable missing")
+      sys.exit(-1)
+
+   mcc = MCCBoard(mcc_ver)
    
    # sw
    sw_parser = cmd2.Cmd2ArgumentParser()
