@@ -12,7 +12,7 @@ OUT_GPIO_BANK = 9
 OUT_GPIO_LINE = 2    # PLL_LOCK 
 
 # led pin
-LED_GPIO_BANK = 3
+LED_GPIO_BANK = 3    # LED0
 LED_GPIO_LINE = 0
 
 chip_in = gpiod.Chip(f"gpiochip{IN_GPIO_BANK}")
@@ -24,6 +24,8 @@ line_out = chip_out.get_line(OUT_GPIO_LINE)
 chip_led = gpiod.Chip(f"gpiochip{LED_GPIO_BANK}")
 line_led = chip_led.get_line(LED_GPIO_LINE)
 
+# mirror PS_MIO46 to PL
+# mirror PS_MIO46 to LED0
 line_in.request(consumer="ps_pll_lol", type=gpiod.LINE_REQ_EV_BOTH_EDGES)  # rising + falling
 line_out.request(consumer="pl_pll_lock", type=gpiod.LINE_REQ_DIR_OUT, default_vals=[0])
 line_led.request(consumer="ps_pll_led", type=gpiod.LINE_REQ_DIR_OUT, default_vals=[0])
