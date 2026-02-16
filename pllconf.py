@@ -24,7 +24,7 @@ def main():
    parser.add_argument("-r", "--reset", action="store_true", required=False, help="reset PLL")
    args = parser.parse_args()
 
-   isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "gpiochip1", 0)
+   isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "a0080000.gpio", 0)
    isw.reset()
 
    pll = Si5345(I2C_BUS , SI5342_I2C_ADDR, (partial(isw.select, SI5342_MUX_CHANNEL),))

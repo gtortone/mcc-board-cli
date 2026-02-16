@@ -4,24 +4,24 @@ import gpiod
 import select
 
 # input pin
-IN_GPIO_BANK = 4
+IN_GPIO_BANK = "zynqmp_gpio" 
 IN_GPIO_LINE = 46    # PLL_LOL PS_MIO46
 
 # output pin
-OUT_GPIO_BANK = 9
+OUT_GPIO_BANK = "a0130000.gpio"
 OUT_GPIO_LINE = 2    # PLL_LOCK 
 
 # led pin
-LED_GPIO_BANK = 3    # LED0
+LED_GPIO_BANK = "a0060000.gpio"   # LED0
 LED_GPIO_LINE = 0
 
-chip_in = gpiod.Chip(f"gpiochip{IN_GPIO_BANK}")
+chip_in = gpiod.Chip(f"{IN_GPIO_BANK}")
 line_in = chip_in.get_line(IN_GPIO_LINE)
 
-chip_out = gpiod.Chip(f"gpiochip{OUT_GPIO_BANK}")
+chip_out = gpiod.Chip(f"{OUT_GPIO_BANK}")
 line_out = chip_out.get_line(OUT_GPIO_LINE)
 
-chip_led = gpiod.Chip(f"gpiochip{LED_GPIO_BANK}")
+chip_led = gpiod.Chip(f"{LED_GPIO_BANK}")
 line_led = chip_led.get_line(LED_GPIO_LINE)
 
 # mirror PS_MIO46 to PL
