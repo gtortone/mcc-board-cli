@@ -19,12 +19,13 @@ def read():
 
 if __name__ == "__main__":
 
-   isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
-   isw.reset()
+   #isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
+   #isw.reset()
 
-   ina = INA238(0, 0x40, 0.02, 10, (partial(isw.select, 3),))
+   #ina = INA238(0, 0x40, 0.02, 10, (partial(isw.select, 3),))
+   ina = INA238(5, 0x40, 0.02, 10)
 
    while True:
       read()
       print("===================================================")
-      sleep(1)
+      sleep(0.2)

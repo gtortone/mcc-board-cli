@@ -19,14 +19,15 @@ def read():
 
 if __name__ == "__main__":
 
-   isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
-   isw.reset()
+   #isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
+   #isw.reset()
 
-   ina = INA226(0, 0x41, 0.02, (partial(isw.select, 3),))
+   #ina = INA226(0, 0x41, 0.02, (partial(isw.select, 3),))
+   ina = INA226(4, 0x41, 0.02)
    ina.configure(avg_mode=INA226.AVG_16BIT)
 
    while True:
       if ina.is_conversion_ready():
          read()
          print("===================================================")
-      sleep(1)
+      sleep(0.2)

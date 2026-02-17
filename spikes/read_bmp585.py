@@ -10,11 +10,11 @@ from lib.BMP585 import BMP585
 
 from lib.I2CSwitch import I2CSwitch
 
-isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
-isw.reset()
+#isw = I2CSwitch(0, 0x70, "a0080000.gpio", 0)
+#isw.reset()
 
 #bmp = BMP585(0, 0x47, False, (partial(isw.select, 5),))
-bmp = BMP585(0, 0x47, True, (partial(isw.select, 5),))
+bmp = BMP585(7, 0x47, True)
 
 while True:
     temp, pressure = bmp.read()
