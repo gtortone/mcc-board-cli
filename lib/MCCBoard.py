@@ -6,8 +6,16 @@ from lib.POEController import POEController
 from lib.POESwitch import POESwitch
 from lib.SFP import SFP
 from lib.FPGARegister import FPGARegister
+from lib.INA226 import INA226
+from lib.INA238 import INA238
+from lib.SHT40 import SHT40
+from lib.BMP585 import BMP585
 
 """
+======
+MCCv2
+======
+
 I2C switch 0x70
 ---------------
 channel 0:        Si3472      (POE0)         addr: 0x20
@@ -30,54 +38,69 @@ channel 5:        BMP585      (pressure)     addr: 0x47
 channel 6:        SFP2                       addr: 0x50
 
 channel 7:        SFP1                       addr: 0x50
-
-GPIO layout
------------
-SFP0 power switch:       SFP0_EN        (AP22653AW6-7 switch)      PS_MIO49
-SFP0 fault:              SFP0_FAULT     (AP22653AW6-7 switch)
-SFP0 alert:              SFP0_ALERT     (INA226)
-
-SFP1 power switch:       SFP1_EN        (AP22653AW6-7 switch)      PS_MIO48
-SFP1 fault:              SFP1_FAULT     (AP22653AW6-7 switch)
-SFP0 alert:              SFP0_ALERT     (INA226)
-
-SFP2 power switch:       SFP2_EN        (AP22653AW6-7 switch)      PS_MIO47
-SFP2 fault:              SFP2_FAULT     (AP22653AW6-7 switch)
-SFP2 alert:              SFP2_ALERT     (INA226)
-
-ALERT56                                 (INA238)                   PS_MIO50
-ALERT12:                                (INA226)                   PS_MIO51
 """
 
 class MCCBoard:
 
-   I2C_BUS = 0
-   I2C_SW_ADDR = 0x70
-   I2C_POE0_ADDR = 0x20
-   I2C_POE1_ADDR = 0x22
-   I2C_SFP_ADDR = 0x50
+   def __init__(self, ver):
 
-   def __init__(self):
-      isw = I2CSwitch(self.I2C_BUS, self.I2C_SW_ADDR, "gpiochip3", 0)
-      isw.reset()
-      
-      self.sw = POESwitch()
-      self.pc1 = POEController(self.I2C_BUS, self.I2C_POE0_ADDR, 
-         (partial(isw.select, 0),), portmap=[1, 0, 2, 3])
-      self.pc2 = POEController(self.I2C_BUS, self.I2C_POE1_ADDR, 
-         (partial(isw.select, 0),), portmap=[1, 0, 2, 3])
+      if ver == '1':
+         None
 
-      self.sw.add_controller(self.pc1)
-      self.sw.add_controller(self.pc2)
+      elif ver == '2':
 
-      self.sfp = [
-            SFP(self.I2C_BUS, self.I2C_SFP_ADDR, 
-               (partial(isw.select, 1),), "gpiochip7", 49),
-            SFP(self.I2C_BUS, self.I2C_SFP_ADDR, 
-               (partial(isw.select, 7),), "gpiochip7", 48),
-            SFP(self.I2C_BUS, self.I2C_SFP_ADDR, 
-               (partial(isw.select, 6),), "gpiochip7", 47)
-      ]
+         I2C_POE_BUS = 2
+         I2C_POE0_ADDR = 0x20
+         I2C_POE1_ADDR = 0x22
 
-      self.fpga = FPGARegister('/dev/uio0')
+         I2C_SFP0_BUS = 3
+         I2C_SFP1_BUS = 9
+         I2C_SFP2_BUS = 8
+         I2C_SFP_ADDR = 0x50
+
+         I2C_SFP_MON_BUS = 4
+         I2C_SFP0_MON_ADDR = 0x40
+         I2C_SFP1_MON_ADDR = 0x41
+         I2C_SFP2_MON_ADDR = 0x44
+
+         I2C_BOARD_MON_BUS = 5
+         I2C_56V_MON_ADDR = 0x40
+         I2C_12V_MON_ADDR = 0x41
+
+         I2C_ENV_MON_BUS = 7
+         I2C_SHT40_ADDR = 0x44 
+         I2C_BMP585_ADDR = 0x47
+
+         self.sw = POESwitch()
+         self.pc1 = POEController(I2C_POE_BUS, I2C_POE0_ADDR, (), portmap=[1, 0, 2, 3])
+         self.pc2 = POEController(I2C_POE_BUS, I2C_POE1_ADDR, (), portmap=[1, 0, 2, 3])
+
+         self.sw.add_controller(self.pc1)
+         self.sw.add_controller(self.pc2)
+
+         self.sfp = [
+            SFP(I2C_SFP0_BUS, I2C_SFP_ADDR, (), "zynqmp_gpio", 49),
+            SFP(I2C_SFP1_BUS, I2C_SFP_ADDR, (), "zynqmp_gpio", 48),
+            SFP(I2C_SFP2_BUS, I2C_SFP_ADDR, (), "zynqmp_gpio", 47)
+         ]
+
+         self.sfpmon = [
+            INA226(I2C_SFP_MON_BUS, I2C_SFP0_MON_ADDR, shunt_ohms=0.02),
+            INA226(I2C_SFP_MON_BUS, I2C_SFP1_MON_ADDR, shunt_ohms=0.02),
+            INA226(I2C_SFP_MON_BUS, I2C_SFP2_MON_ADDR, shunt_ohms=0.02)
+         ]
+
+         self.boardmon = [
+            INA238(I2C_BOARD_MON_BUS, I2C_56V_MON_ADDR, shunt_ohms=0.02, max_current=10),
+            INA226(I2C_BOARD_MON_BUS, I2C_12V_MON_ADDR, shunt_ohms=0.02),
+         ]
+
+         self.sht40 = SHT40(I2C_ENV_MON_BUS, I2C_SHT40_ADDR)
+
+         self.bmp585 = BMP585(I2C_ENV_MON_BUS, I2C_BMP585_ADDR, forced_mode=True)
+
+         self.fpga = FPGARegister('/dev/uio0')
+
+      else:
+         print(f"E: MCC version {ver} not valid")
 
