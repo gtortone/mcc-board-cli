@@ -23,8 +23,7 @@ class SFP:
       self.bus = SMBus(i2c_bus)
       if (chip is not None and line is not None):
          self.chip = gpiod.Chip(chip)
-         self.line = self.chip.get_line(line)
-         self.line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
+         self.line = line
       else:
          self.chip = self.line = None
 
@@ -34,11 +33,17 @@ class SFP:
 
    def on(self):
       if self.chip is not None:
-         self.line.set_value(1)
+         line = self.chip.get_line(self.line) 
+         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
+         line.set_value(1)
+         line.release() 
 
    def off(self):
       if self.chip is not None:
-         self.line.set_value(0)
+         line = self.chip.get_line(self.line) 
+         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
+         line.set_value(0)
+         line.release() 
 
    def is_available(self):
       self.select()
