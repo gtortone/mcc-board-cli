@@ -31,5 +31,6 @@ while True:
 
    poller.poll()
 
+   ev = line_in.event_read()
    print(f"ts:{ev.sec}.{ev.nsec} falling edge - reset PLL chip")
    pll.reset()
