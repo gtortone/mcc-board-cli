@@ -12,16 +12,18 @@ class I2CSwitch:
       self.bus = SMBus(i2c_bus)
       if (chip is not None and line is not None):
          self.chip = gpiod.Chip(chip)
-         self.line = self.chip.get_line(line)
-         self.line.request(consumer="i2cmux_rst", type=gpiod.LINE_REQ_DIR_OUT)
+         self.pin = line
       else:
          self.chip = self.line = None
 
    def reset(self):
       if self.chip is not None:
+         self.line = self.chip.get_line(self.pin)
+         self.line.request(consumer="i2cmux_rst", type=gpiod.LINE_REQ_DIR_OUT)
          self.line.set_value(0)
          time.sleep(0.1)
          self.line.set_value(1)
+         self.line.release()
 
    def select(self, channel):
       if channel not in range(8):
