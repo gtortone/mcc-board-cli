@@ -11,9 +11,8 @@ from lib.Si5345 import Si5345
 from functools import partial
 
 I2C_BUS = 0
-I2C_SW_ADDR = 0x70
 
-SI5342_MUX_CHANNEL = 4
+SI5342_I2C_BUS = 6
 SI5342_I2C_ADDR = 0x68
 
 reserved_regs = [0x001C, 0x0B24, 0x0B25, 0x0540, 0x0514]
@@ -26,10 +25,7 @@ def main():
    parser.add_argument("-r", "--reset", action="store_true", required=False, help="reset PLL")
    args = parser.parse_args()
 
-   isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "a0080000.gpio", 0)
-   isw.reset()
-
-   pll = Si5345(I2C_BUS , SI5342_I2C_ADDR, (partial(isw.select, SI5342_MUX_CHANNEL),))
+   pll = Si5345(SI5342_I2C_BUS, SI5342_I2C_ADDR)
 
    if args.reset:
       pll.reset()
