@@ -10,10 +10,7 @@ from lib.I2CSwitch import I2CSwitch
 from lib.Si5345 import Si5345
 from functools import partial
 
-I2C_BUS = 0
-I2C_SW_ADDR = 0x70
-
-SI5342_MUX_CHANNEL = 4
+I2C_SI5342_BUS = 6
 SI5342_I2C_ADDR = 0x68
 
 # input pin
@@ -25,10 +22,7 @@ line_in = chip_in.get_line(IN_GPIO_LINE)
 
 line_in.request(consumer="pl_timing_lock", type=gpiod.LINE_REQ_EV_FALLING_EDGE) 
 
-isw = I2CSwitch(I2C_BUS, I2C_SW_ADDR, "a0080000.gpio", 0)
-isw.reset()
-
-pll = Si5345(I2C_BUS , SI5342_I2C_ADDR, (partial(isw.select, SI5342_MUX_CHANNEL),))
+pll = Si5345(I2C_SI5342_BUS, SI5342_I2C_ADDR)
 
 poller = select.poll()
 poller.register(line_in.event_get_fd(), select.POLLIN)
