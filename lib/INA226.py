@@ -109,10 +109,10 @@ class INA226:
       return float(self.voltage()) + (float(self.shunt_voltage()) / 1000)
 
    def shunt_voltage(self):
-      return self.read_register(self.REG_SHUNTVOLTAGE) * self.SHUNT_MILLIVOLTS_LSB
+      return self.read_register(self.REG_SHUNTVOLTAGE, True) * self.SHUNT_MILLIVOLTS_LSB
 
    def current(self):
-      return self.read_register(self.REG_CURRENT) * self.current_lsb
+      return self.read_register(self.REG_CURRENT, True) * self.current_lsb
 
    def power(self):
       return self.read_register(self.REG_POWER) * self.power_lsb
