@@ -17,33 +17,68 @@ class SFP:
 
    LC_CONNECTOR_TYPE = 0x07
 
-   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), chip=None, line=None):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), chip_sw=None, line_sw=None, chip_flags=None, line_flags=[]):
       self.i2c_addr = i2c_addr
       self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
-      if (chip is not None and line is not None):
-         self.chip = gpiod.Chip(chip)
-         self.line = line
+
+      if (chip_sw is not None and line_sw is not None):
+         self.chip_sw = gpiod.Chip(chip_sw)
+         self.line_sw = line_sw
       else:
-         self.chip = self.line = None
+         self.chip_sw = self.line_sw = None
+   
+      # flags order: TXF, LOS, TXD, MOD      
+      if (chip_flags is not None and line_flags is not None):
+         self.chip_flags = gpiod.Chip(chip_flags)
+         self.line_flags = line_flags
+      else:
+         self.chip_flags = self.line_flags = None
 
    def select(self):
       for func in self.i2c_select:
          func()
 
    def on(self):
-      if self.chip is not None:
-         line = self.chip.get_line(self.line) 
+      if self.chip_sw is not None:
+         line = self.chip_sw.get_line(self.line_sw) 
          line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
          line.set_value(1)
          line.release() 
 
    def off(self):
-      if self.chip is not None:
-         line = self.chip.get_line(self.line) 
+      if self.chip_sw is not None:
+         line = self.chip_sw.get_line(self.line_sw) 
          line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
          line.set_value(0)
          line.release() 
+
+   def power_status(self):
+      if self.chip_sw is not None:
+         line = self.chip_sw.get_line(self.line_sw)
+         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
+         value = line.get_value()
+         line.release()
+         return value
+      return None
+
+   def flags(self):
+      if self.chip_flags is not None:
+         flags = []
+         for i in range(4):
+            line = self.chip_flags.get_line(self.line_flags[i])
+            line.request(consumer="sfp_flag", type=gpiod.LINE_REQ_DIR_AS_IS)
+            flags.append(line.get_value())
+            line.release()
+            return flags
+      return None
+
+   def power_status_str(self):
+      pstatus = self.power_status()
+      if pstatus is None:
+         return ""
+      else:
+         return "ON" if self.power_status() == 1 else "OFF"   
 
    def is_available(self):
       self.select()
@@ -124,6 +159,8 @@ class SFP:
       return round(float(power * 0.1), 2)  # LSB = 0.1 uW
 
    def print(self):
+      if self.chip_sw is not None:
+         print(f'power switch: {self.power_status_str()}')
       print(f"vendor: {self.vendor()}")
       print(f"model: {self.model()}")
       print(f"serial: {self.serial()}")
@@ -137,6 +174,8 @@ class SFP:
 
    def as_dict(self):
       d = {}
+      if self.chip_sw is not None:
+         d["power"] = self.power_status_str()
       d["vendor"] = self.vendor()
       d["model"] = self.model()
       d["serial"] = self.serial()
