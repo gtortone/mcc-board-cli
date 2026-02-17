@@ -61,6 +61,8 @@ class INA226:
       self.shunt_ohms = shunt_ohms
       self.min_device_current_lsb = self.CALIBRATION_FACTOR / (self.shunt_ohms * self.MAX_CALIBRATION_VALUE)
       self.max_expected_amps = None
+
+      self.configure(avg_mode=INA226.AVG_16BIT)
       self.select() 
 
    def select(self):
