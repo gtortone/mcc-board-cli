@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
    #ina = INA226(0, 0x41, 0.02, (partial(isw.select, 3),))
    ina = INA226(4, 0x41, 0.02)
-   ina.configure(avg_mode=INA226.AVG_16BIT)
+   #ina.configure(avg_mode=INA226.AVG_16BIT)
 
    while True:
       if ina.is_conversion_ready():

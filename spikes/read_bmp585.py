@@ -20,6 +20,6 @@ while True:
     temp, pressure = bmp.read()
 
     print(f"Temperature: {temp:.2f} °C")
-    print(f"Pressure:   {pressure:.2f} Pa")
+    print(f"Pressure:   {pressure:.2f} Pa / {pressure/100:.2f} mbar")
     print("--------------")
 
