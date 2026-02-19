@@ -100,6 +100,14 @@ class FPGADevice:
             out.append(d)
       return out 
 
+   def get_timing_status(self):
+      value = self.read_register(10);
+      data = {}
+      data['MCC-MCC timing link locked'] = bool(value & (1 << 8))
+      data['Si5345 PLL locked'] = bool(value & (1 << 4))
+      data['TDM-MCC timing link locked'] = bool(value & 1)
+      return data
+
    def bitstream_version(self):
       commit_hash = hex(self.read_register(0))[2:]
 

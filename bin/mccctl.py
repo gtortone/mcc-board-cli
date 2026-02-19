@@ -53,6 +53,12 @@ class App(cmd2.Cmd):
    fpga_info_parser = fpga_subparser.add_parser('info', help='print FPGA info')
    fpga_status_parser = fpga_subparser.add_parser('status', help='print FPGA status')
 
+   # timing
+   timing_parser = cmd2.Cmd2ArgumentParser()
+   timing_subparser = timing_parser.add_subparsers(title='subcommands', help='subcommand help')
+
+   timing_status_parser = timing_subparser.add_parser('status', help='print timing system status')
+
    # board
    board_parser = cmd2.Cmd2ArgumentParser()
    board_subparser = board_parser.add_subparsers(title='subcommands', help='subcommand help')
@@ -202,6 +208,17 @@ class App(cmd2.Cmd):
          colalign=("left", "decimal", "decimal", "decimal")))
       print()
 
+   def timingstatus(self, args):
+      tstatus = self.mcc.fpga.get_timing_status() 
+      
+      data = []
+      for k,v in tstatus.items():
+         data.append([k, v])
+
+      print()
+      print(tabulate(data, headers=["parameter", "status"], tablefmt="simple"))
+      print()
+
    sw_port_parser.set_defaults(func=swport)
    sw_status_parser.set_defaults(func=swstatus)
    sfp_status_parser.set_defaults(func=sfpstatus)
@@ -213,6 +230,7 @@ class App(cmd2.Cmd):
    fpga_info_parser.set_defaults(func=fpgainfo)
    fpga_status_parser.set_defaults(func=fpgastatus)
    board_status_parser.set_defaults(func=boardstatus)
+   timing_status_parser.set_defaults(func=timingstatus)
 
    @cmd2.with_argparser(sw_parser)
    def do_sw(self, args):
@@ -245,6 +263,14 @@ class App(cmd2.Cmd):
          func(self, args)
       else:
          self.do_help('board')
+
+   @cmd2.with_argparser(timing_parser)
+   def do_timing(self, args):
+      func = getattr(args, 'func', None)
+      if func is not None:
+         func(self, args)
+      else:
+         self.do_help('timing')
 
 if __name__ == '__main__':
    c = App()
