@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
+import time
 import gpiod
 import select
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+from lib.Si5345 import Si5345
 
 # input pin
 IN_GPIO_BANK = "zynqmp_gpio" 
@@ -37,6 +43,10 @@ line_led.set_value(line_in.get_value())
 poller = select.poll()
 poller.register(line_in.event_get_fd(), select.POLLIN)
 
+I2C_SI5342_BUS = 6
+SI5342_I2C_ADDR = 0x68
+pll = Si5345(I2C_SI5342_BUS, SI5342_I2C_ADDR)
+
 while True:
 
    poller.poll()
@@ -46,6 +56,9 @@ while True:
       print(f"ts:{ev.sec}.{ev.nsec} rising edge")
    elif ev.type == gpiod.LineEvent.FALLING_EDGE:
       print(f"ts:{ev.sec}.{ev.nsec} falling edge")
+      print("-- reset PLL")
+      pll.reset()
+      time.sleep(5)
 
    line_out.set_value(line_in.get_value())
    line_led.set_value(line_in.get_value())
