@@ -39,16 +39,16 @@ class App(cmd2.Cmd):
    sfp_port_parser.add_argument('num', type=int, help='port number')
    sfp_port_parser.add_argument('command', choices=['on','off'], help='command')
 
-   # reg
-   reg_parser = cmd2.Cmd2ArgumentParser()
-   reg_subparser = reg_parser.add_subparsers(title='subcommands', help='subcommand help')
+   # fpga 
+   fpga_parser = cmd2.Cmd2ArgumentParser()
+   fpga_subparser = fpga_parser.add_subparsers(title='subcommands', help='subcommand help')
    
-   reg_read_parser = reg_subparser.add_parser('read', help='read FPGA register')
-   reg_read_parser.add_argument('address', help='register address - decimal or hexadecimal (prefix 0x)')
+   fpga_read_parser = fpga_subparser.add_parser('read', help='read FPGA register')
+   fpga_read_parser.add_argument('address', help='register address - decimal or hexadecimal (prefix 0x)')
 
-   reg_write_parser = reg_subparser.add_parser('write', help='write FPGA register')
-   reg_write_parser.add_argument('address', help='register address - decimal or hexadecimal (prefix 0x)')
-   reg_write_parser.add_argument('value', help='register value - decimal or hexadecimal (prefix 0x)')
+   fpga_write_parser = fpga_subparser.add_parser('write', help='write FPGA register')
+   fpga_write_parser.add_argument('address', help='register address - decimal or hexadecimal (prefix 0x)')
+   fpga_write_parser.add_argument('value', help='register value - decimal or hexadecimal (prefix 0x)')
 
    # board
    board_parser = cmd2.Cmd2ArgumentParser()
@@ -132,12 +132,12 @@ class App(cmd2.Cmd):
          print(f"turn off SFP {args.num}")
          self.mcc.sfp[args.num].off() 
 
-   def regread(self, args):
+   def fpgaread(self, args):
       addr = int(args.address, 0)
       value = self.mcc.fpga.read_register(addr)
       self.poutput(f'0x{value:08x} ({value})')
       
-   def regwrite(self, args):
+   def fpgawrite(self, args):
       try:
          addr = int(args.address, 0)
          value = int(args.value, 0)
@@ -187,8 +187,8 @@ class App(cmd2.Cmd):
    sfp_info_parser.set_defaults(func=sfpinfo)
    sfp_info_parser.set_defaults(func=sfpinfo)
    sfp_port_parser.set_defaults(func=sfpport)
-   reg_read_parser.set_defaults(func=regread)
-   reg_write_parser.set_defaults(func=regwrite)
+   fpga_read_parser.set_defaults(func=fpgaread)
+   fpga_write_parser.set_defaults(func=fpgawrite)
    board_status_parser.set_defaults(func=boardstatus)
 
    @cmd2.with_argparser(sw_parser)
@@ -207,8 +207,8 @@ class App(cmd2.Cmd):
       else:
          self.do_help('sfp')
 
-   @cmd2.with_argparser(reg_parser)
-   def do_reg(self, args):
+   @cmd2.with_argparser(fpga_parser)
+   def do_fpga(self, args):
       func = getattr(args, 'func', None)
       if func is not None:
          func(self, args)

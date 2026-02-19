@@ -1,7 +1,7 @@
 
 import mmap
 
-class FPGARegister:
+class FPGADevice:
 
    def __init__(self, uiodev):
       try:
@@ -16,4 +16,4 @@ class FPGARegister:
       return int.from_bytes(self.regs[add*4:(add*4)+4], byteorder='little')
 
    def write_register(self, add, value) -> None:
-      self.regs[add*4:(add*4)+4] = int.to_bytes(value, 4, byteorder='little')
+      self.regs[add*4:(add*4)+4] = int.to_bytes(value, 4, byteorder='little') 

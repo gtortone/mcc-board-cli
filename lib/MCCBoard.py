@@ -5,7 +5,7 @@ from lib.I2CSwitch import I2CSwitch
 from lib.POEController import POEController
 from lib.POESwitch import POESwitch
 from lib.SFP import SFP
-from lib.FPGARegister import FPGARegister
+from lib.FPGADevice import FPGADevice
 from lib.INA226 import INA226
 from lib.INA238 import INA238
 from lib.SHT40 import SHT40
@@ -99,7 +99,7 @@ class MCCBoard:
 
          self.bmp585 = BMP585(I2C_ENV_MON_BUS, I2C_BMP585_ADDR, forced_mode=True)
 
-         self.fpga = FPGARegister('/dev/uio0')
+         self.fpga = FPGADevice('/dev/uio0')
 
       else:
          print(f"E: MCC version {ver} not valid")
