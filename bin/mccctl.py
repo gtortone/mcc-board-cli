@@ -50,7 +50,7 @@ class App(cmd2.Cmd):
    fpga_write_parser.add_argument('address', help='register address - decimal or hexadecimal (prefix 0x)')
    fpga_write_parser.add_argument('value', help='register value - decimal or hexadecimal (prefix 0x)')
 
-   fpga_ver_parser = fpga_subparser.add_parser('ver', help='print FPGA bitstream version')
+   fpga_info_parser = fpga_subparser.add_parser('info', help='print FPGA info')
 
    # board
    board_parser = cmd2.Cmd2ArgumentParser()
@@ -148,7 +148,7 @@ class App(cmd2.Cmd):
       except:
          self.perror(f'Write register error')
 
-   def fpgaver(self, args):
+   def fpgainfo(self, args):
       ver = self.mcc.fpga.bitstream_version()
       print(f"build: {ver['build_date']}/{ver['build_time']}, commit: {ver['commit_date']}/{ver['commit_hash']}")
    
@@ -195,7 +195,7 @@ class App(cmd2.Cmd):
    sfp_port_parser.set_defaults(func=sfpport)
    fpga_read_parser.set_defaults(func=fpgaread)
    fpga_write_parser.set_defaults(func=fpgawrite)
-   fpga_ver_parser.set_defaults(func=fpgaver)
+   fpga_info_parser.set_defaults(func=fpgainfo)
    board_status_parser.set_defaults(func=boardstatus)
 
    @cmd2.with_argparser(sw_parser)
