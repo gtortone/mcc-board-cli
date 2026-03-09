@@ -16,6 +16,22 @@ from lib.Host import Host
 
 """
 ======
+MCCv1
+======
+
+I2C switch 0x72
+   channel 0:     clock
+   channel 1:     not used
+   channel 2:     not used
+   channel 3:     I2C switch 0x71
+
+I2C switch 0x71
+   channel 0:     poe
+   channel 1:     sfp 1
+   channel 2:     sfp 0
+   channel 3:     not used
+
+======
 MCCv2
 ======
 
@@ -48,15 +64,41 @@ class MCCBoard:
    def __init__(self):
 
       self.host = Host()
+      self.fpga = FPGADevice('/dev/uio0')
 
       if((ver := os.environ.get('MCC_MAJOR_VER')) is None):
          print("E: MCC_MAJOR_VER env variable missing")
          sys.exit(-1)
 
-      if ver == '1':
-         None
+      self.version = int(ver)
 
-      elif ver == '2':
+      if self.version == 1:
+
+         I2C_BUS = 0
+         I2C_SW0_ADDR = 0x71
+         I2C_SW1_ADDR = 0x72
+         I2C_POE0_ADDR = 0x20
+         I2C_POE1_ADDR = 0x22
+         I2C_SFP_ADDR = 0x50
+
+         isw1 = I2CSwitch(I2C_BUS, I2C_SW1_ADDR)
+         isw2 = I2CSwitch(I2C_BUS, I2C_SW0_ADDR)
+
+         self.sw = POESwitch()
+         self.pc1 = POEController(I2C_BUS, I2C_POE0_ADDR, 
+            (partial(isw1.select, 3), partial(isw2.select, 0)))
+         self.pc2 = POEController(I2C_BUS, I2C_POE1_ADDR, 
+            (partial(isw1.select, 3), partial(isw2.select, 0)))
+
+         self.sw.add_controller(self.pc1)
+         self.sw.add_controller(self.pc2)
+
+         self.sfp = [
+            SFP(I2C_BUS, I2C_SFP_ADDR, (partial(isw1.select, 3), partial(isw2.select, 2))),
+            SFP(I2C_BUS, I2C_SFP_ADDR, (partial(isw1.select, 3), partial(isw2.select, 1)))
+         ]
+
+      elif self.version == 2:
 
          I2C_POE_BUS = 2
          I2C_POE0_ADDR = 0x20
@@ -107,9 +149,6 @@ class MCCBoard:
          self.sht40 = SHT40(I2C_ENV_MON_BUS, I2C_SHT40_ADDR)
 
          self.bmp585 = BMP585(I2C_ENV_MON_BUS, I2C_BMP585_ADDR, forced_mode=True)
-
-         self.fpga = FPGADevice('/dev/uio0')
-
 
       else:
          print(f"E: MCC version {ver} not valid")

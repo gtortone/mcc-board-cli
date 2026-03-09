@@ -76,7 +76,7 @@ class SFP:
    def power_status_str(self):
       pstatus = self.power_status()
       if pstatus is None:
-         return ""
+         return "n/a"
       else:
          return "ON" if self.power_status() == 1 else "OFF"   
 

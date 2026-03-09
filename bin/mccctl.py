@@ -14,7 +14,7 @@ class App(cmd2.Cmd):
       self.prompt = "MCC> "
 
    mcc = MCCBoard()
-   
+
    # sw
    sw_parser = cmd2.Cmd2ArgumentParser()
    sw_subparser = sw_parser.add_subparsers(title='subcommands', help='subcommand help')
@@ -104,17 +104,17 @@ class App(cmd2.Cmd):
 
    def sfpstatus(self, args):
       data = []
-      for i in range(3):
-         if not self.mcc.sfp[i].is_available() or self.mcc.sfp[i].connector_type() != self.mcc.sfp[i].LC_CONNECTOR_TYPE:
-            data.append([f"SFP #{i}", self.mcc.sfp[i].power_status_str()])
+      for i, sfp in enumerate(self.mcc.sfp):
+         if not sfp.is_available() or sfp.connector_type() != sfp.LC_CONNECTOR_TYPE:
+            data.append([f"SFP #{i}", sfp.power_status_str()])
          else:
             data.append([f"SFP #{i}",
-               self.mcc.sfp[i].power_status_str(),
-               self.mcc.sfp[i].voltage(),
-               self.mcc.sfp[i].temperature(),
-               self.mcc.sfp[i].tx_bias(),
-               self.mcc.sfp[i].tx_power(),
-               self.mcc.sfp[i].rx_power()
+               sfp.power_status_str(),
+               sfp.voltage(),
+               sfp.temperature(),
+               sfp.tx_bias(),
+               sfp.tx_power(),
+               sfp.rx_power()
             ])
       print()
       print(tabulate(data, headers=["module", "switch", "voltage [V]", "temperature [C]", 
@@ -123,16 +123,16 @@ class App(cmd2.Cmd):
 
    def sfpinfo(self, args):
       data = []
-      for i in range(3):
-         if not self.mcc.sfp[i].is_available():
-            data.append([f"SFP #{i}", self.mcc.sfp[i].power_status_str()])
+      for i, sfp in enumerate(self.mcc.sfp):
+         if not sfp.is_available():
+            data.append([f"SFP #{i}", sfp.power_status_str()])
          else:
             data.append([f"SFP #{i}",
-               self.mcc.sfp[i].power_status_str(),
-               self.mcc.sfp[i].vendor(),
-               self.mcc.sfp[i].model(),
-               self.mcc.sfp[i].serial(),
-               self.mcc.sfp[i].datecode()
+               sfp.power_status_str(),
+               sfp.vendor(),
+               sfp.model(),
+               sfp.serial(),
+               sfp.datecode()
             ])
       print()
       print(tabulate(data, headers=["module", "switch", "vendor", "model", 
@@ -194,11 +194,11 @@ class App(cmd2.Cmd):
          round(self.mcc.boardmon[1].power(), 2),
          "" 
       ])
-      for i in range(3):
+      for i, sfpmon in enumerate(self.mcc.sfpmon):
          data.append([f"SFP #{i}",
-            round(self.mcc.sfpmon[i].voltage(), 2), 
-            round(self.mcc.sfpmon[i].current() * 1000, 2),
-            round(self.mcc.sfpmon[i].power(), 2),
+            round(sfpmon.voltage(), 2), 
+            round(sfpmon.current() * 1000, 2),
+            round(sfpmon.power(), 2),
             self.mcc.sfp[i].power_status_str() 
          ])
 
@@ -266,9 +266,9 @@ class App(cmd2.Cmd):
    fpga_write_parser.set_defaults(func=fpgawrite)
    fpga_info_parser.set_defaults(func=fpgainfo)
    fpga_status_parser.set_defaults(func=fpgastatus)
+   host_status_parser.set_defaults(func=hoststatus)
    board_status_parser.set_defaults(func=boardstatus)
    timing_status_parser.set_defaults(func=timingstatus)
-   host_status_parser.set_defaults(func=hoststatus)
 
    @cmd2.with_argparser(sw_parser)
    def do_sw(self, args):
@@ -296,6 +296,9 @@ class App(cmd2.Cmd):
 
    @cmd2.with_argparser(board_parser)
    def do_board(self, args):
+      if self.mcc.version == 1:
+         print("'board' command not available for MCCv1")
+         return 
       func = getattr(args, 'func', None)
       if func is not None:
          func(self, args)
@@ -304,6 +307,9 @@ class App(cmd2.Cmd):
 
    @cmd2.with_argparser(timing_parser)
    def do_timing(self, args):
+      if self.mcc.version == 1:
+         print("'timing' command not available for MCCv1")
+         return
       func = getattr(args, 'func', None)
       if func is not None:
          func(self, args)
