@@ -1,4 +1,5 @@
 
+import os
 from functools import partial
 
 from lib.I2CSwitch import I2CSwitch
@@ -43,9 +44,13 @@ channel 7:        SFP1                       addr: 0x50
 
 class MCCBoard:
 
-   def __init__(self, ver):
+   def __init__(self):
 
       self.host = Host()
+
+      if((ver := os.environ.get('MCC_MAJOR_VER')) is None):
+         print("E: MCC_MAJOR_VER env variable missing")
+         sys.exit(-1)
 
       if ver == '1':
          None
@@ -103,6 +108,7 @@ class MCCBoard:
          self.bmp585 = BMP585(I2C_ENV_MON_BUS, I2C_BMP585_ADDR, forced_mode=True)
 
          self.fpga = FPGADevice('/dev/uio0')
+
 
       else:
          print(f"E: MCC version {ver} not valid")
