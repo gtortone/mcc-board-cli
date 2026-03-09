@@ -58,7 +58,7 @@ while True:
       print(f"ts:{ev.sec}.{ev.nsec} falling edge")
       print("-- reset PLL")
       pll.reset()
-      time.sleep(5)
+      #time.sleep(2)
 
    line_out.set_value(line_in.get_value())
    line_led.set_value(line_in.get_value())
