@@ -133,6 +133,25 @@ class POEController:
       poedet = self.read_register(self.REG_PORT_CLASS_DETECT_STATUS + self.portmap.index(port)) & (0x0F)
       return self.poe_detection_str[poedet] 
 
+   def port_set_keep_power(self, port, value):
+      # keep port power even if PD current too low
+      if port not in range(4):
+         raise IndexError("port index must be inside [0...3] range")
+      mask = 0x01 << self.portmap.index(port)
+      regval = self.read_register(self.REG_DISCONNECT_ENABLE)
+
+      if not value:
+         regval |= mask
+      else:
+         regval &= ~mask;
+         
+      self.write_register(self.REG_DISCONNECT_ENABLE, regval)
+
+   def port_get_keep_power(self, port):
+      if port not in range(4):
+         raise IndexError("port index must be inside [0...3] range")
+      return not bool(self.read_register(self.REG_DISCONNECT_ENABLE) & (1 << self.portmap.index(port)))
+
    def temperature(self):
       value = self.read_register(self.REG_TEMPERATURE)
       t = round(float((value * 0.652) - 20), 2)

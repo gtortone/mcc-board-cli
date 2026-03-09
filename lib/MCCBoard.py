@@ -10,6 +10,7 @@ from lib.INA226 import INA226
 from lib.INA238 import INA238
 from lib.SHT40 import SHT40
 from lib.BMP585 import BMP585
+from lib.Host import Host
 
 """
 ======
@@ -43,6 +44,8 @@ channel 7:        SFP1                       addr: 0x50
 class MCCBoard:
 
    def __init__(self, ver):
+
+      self.host = Host()
 
       if ver == '1':
          None

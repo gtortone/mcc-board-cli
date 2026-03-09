@@ -48,6 +48,16 @@ class POESwitch:
       if index not in range(4 * len(self.poectrl)):
          raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
       return self.poectrl[int(index/4)].port_detection(index%4)
+
+   def port_get_keep_power(self, index):
+      if index not in range(4 * len(self.poectrl)):
+         raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
+      return self.poectrl[int(index/4)].port_get_keep_power(index%4)
+
+   def port_set_keep_power(self, index, value):
+      if index not in range(4 * len(self.poectrl)):
+         raise IndexError(f"port index must be inside [0...{4*len(self.poectrl)}] range")
+      return self.poectrl[int(index/4)].port_set_keep_power(index%4, value)
    
    def voltage_in(self, index):
       if index not in range(len(self.poectrl)):
