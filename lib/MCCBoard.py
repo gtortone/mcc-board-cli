@@ -1,5 +1,6 @@
 
 import os
+import sys
 from functools import partial
 
 from lib.I2CSwitch import I2CSwitch
