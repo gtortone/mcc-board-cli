@@ -137,13 +137,24 @@ class FPGADevice:
          ':',
          value[4:6],
          '.',
-         value[6:8],
+         value[6:8]
       ))
+
+      value = hex(self.read_register(4))[2:].zfill(8)
+      release = ''.join((
+         str(int(value[0:2])),
+         '.',
+         str(int(value[2:4])),
+         '.',
+         str(int(value[4:8]))
+      ))
+      
 
       return { 
          "build_date": build_date, 
          "build_time": build_time,
          "commit_date": commit_date,
-         "commit_hash": commit_hash
+         "commit_hash": commit_hash,
+         "release": release
       }
 
