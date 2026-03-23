@@ -94,6 +94,8 @@ class POESwitch:
       d["voltage"] = self.poectrl[c].port_voltage(p)
       d["current"] = self.poectrl[c].port_current(p)
       d["power"] = self.poectrl[c].port_power(p)
+      d["options"] = {}
+      d["options"]["keep_power"] = self.poectrl[c].port_get_keep_power(p)
 
       return d
       

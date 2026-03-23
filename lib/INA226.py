@@ -53,10 +53,11 @@ class INA226:
    MAX_CURRENT_VALUE = 0x7FFF
    CURRENT_LSB_FACTOR = 32768
 
-   def __init__(self, i2c_bus, i2c_addr, shunt_ohms=0.02, i2c_select=()):
+   def __init__(self, i2c_bus, i2c_addr, shunt_ohms=0.02, i2c_select=(), label=""):
       self.i2c_addr = i2c_addr
       self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
+      self.label = label
    
       self.shunt_ohms = shunt_ohms
       self.min_device_current_lsb = self.CALIBRATION_FACTOR / (self.shunt_ohms * self.MAX_CALIBRATION_VALUE)
@@ -133,4 +134,11 @@ class INA226:
             register_value -= 65536
       return register_value
 
-    
+   def as_dict(self):
+      d = {}
+      d["label"] = self.label
+      d["voltage"] = round(self.voltage(), 2)
+      d["current"] = round(self.current() * 1000, 2)
+      d["power"] = round(self.power(), 2)
+
+      return d

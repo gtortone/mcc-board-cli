@@ -1,4 +1,6 @@
 
+import gpiod
+import time
 from smbus2 import SMBus
 
 class POEController:
@@ -7,10 +9,14 @@ class POEController:
    REG_PORT_MODE = 0x12
    REG_DISCONNECT_ENABLE = 0x13
    REG_DETECT_CLASS_ENABLE = 0x14
+   REG_PORT_REMAP = 0x26
    REG_TEMPERATURE = 0x2C
    REG_VPWR_LSB = 0x2E
    REG_PORT1_CURRENT_LSB = 0x30
    REG_PORT1_VOLTAGE_LSB = 0x32
+   REG_PB_POWER_ENABLE = 0x19
+   REG_PB_RESET = 0x1A
+   REG_VENDOR_ID = 0x1B
 
    poe_class_str = [
       "unknown",
@@ -50,7 +56,7 @@ class POEController:
       "mosfet fault"
    ]
 
-   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), portmap=[]):
+   def __init__(self, i2c_bus, i2c_addr, i2c_select=(), chip_sw=None, line_sw=None, portmap=[]):
       self.i2c_addr = i2c_addr
       self.i2c_select = i2c_select
       self.bus = SMBus(i2c_bus)
@@ -59,8 +65,30 @@ class POEController:
       else:
          self.portmap = portmap
 
+      if (chip_sw is not None and line_sw is not None):
+         self.chip_sw = gpiod.Chip(chip_sw)
+         self.line_sw = line_sw
+      else:
+         self.chip_sw = self.line_sw = None
+
       self.select()
-      self.bus.write_byte_data(self.i2c_addr, self.REG_DISCONNECT_ENABLE, 0)
+
+      # release reset and power off POE lines
+      #if self.chip_sw is not None:
+      #   line = self.chip_sw.get_line(self.line_sw)
+      #   line.request(consumer="poe_rst", type=gpiod.LINE_REQ_DIR_AS_IS)
+      #   if line.get_value() == 0:
+      #      start = time.time()
+      #      line.set_value(1)
+
+      #      while (time.time() - start) < 1:
+      #         try:
+      #            self.write_register(self.REG_PORT_MODE, 0x00)
+      #            time.sleep(0.05)
+      #         except:
+      #            pass
+
+      #   line.release()
 
    def select(self):
       for func in self.i2c_select:

@@ -123,8 +123,8 @@ class MCCBoard:
          I2C_BMP585_ADDR = 0x47
 
          self.sw = POESwitch()
-         self.pc1 = POEController(I2C_POE_BUS, I2C_POE0_ADDR, (), portmap=[1, 0, 2, 3])
-         self.pc2 = POEController(I2C_POE_BUS, I2C_POE1_ADDR, (), portmap=[1, 0, 2, 3])
+         self.pc1 = POEController(I2C_POE_BUS, I2C_POE0_ADDR, (), "a0090000.gpio", 0, portmap=[1, 0, 2, 3])
+         self.pc2 = POEController(I2C_POE_BUS, I2C_POE1_ADDR, (), "a0090000.gpio", 1, portmap=[1, 0, 2, 3])
 
          self.sw.add_controller(self.pc1)
          self.sw.add_controller(self.pc2)
@@ -136,14 +136,15 @@ class MCCBoard:
          ]
 
          self.sfpmon = [
-            INA226(I2C_SFP_MON_BUS, I2C_SFP0_MON_ADDR, shunt_ohms=0.02),
-            INA226(I2C_SFP_MON_BUS, I2C_SFP1_MON_ADDR, shunt_ohms=0.02),
-            INA226(I2C_SFP_MON_BUS, I2C_SFP2_MON_ADDR, shunt_ohms=0.02)
+            INA226(I2C_SFP_MON_BUS, I2C_SFP0_MON_ADDR, shunt_ohms=0.02, label="SFP0"),
+            INA226(I2C_SFP_MON_BUS, I2C_SFP1_MON_ADDR, shunt_ohms=0.02, label="SFP1"),
+            INA226(I2C_SFP_MON_BUS, I2C_SFP2_MON_ADDR, shunt_ohms=0.02, label="SFP2")
          ]
 
          self.boardmon = [
-            INA238(I2C_BOARD_MON_BUS, I2C_56V_MON_ADDR, shunt_ohms=0.02, max_current=10),
-            INA226(I2C_BOARD_MON_BUS, I2C_12V_MON_ADDR, shunt_ohms=0.02),
+            INA238(I2C_BOARD_MON_BUS, I2C_56V_MON_ADDR, shunt_ohms=0.02, 
+               max_current=10, label="56V"),
+            INA226(I2C_BOARD_MON_BUS, I2C_12V_MON_ADDR, shunt_ohms=0.02, label="12V"),
          ]
 
          self.sht40 = SHT40(I2C_ENV_MON_BUS, I2C_SHT40_ADDR)
