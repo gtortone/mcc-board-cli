@@ -176,15 +176,19 @@ class SFP:
       d = {}
       if self.chip_sw is not None:
          d["power"] = self.power_status_str()
-      d["vendor"] = self.vendor()
-      d["model"] = self.model()
-      d["serial"] = self.serial()
-      d["datecode"] = self.datecode()
-      if(self.connector_type() == self.LC_CONNECTOR_TYPE):
-         d["voltage"] = self.voltage()
-         d["temperature"] = self.temperature()
-         d["txbias"] = self.tx_bias()
-         d["txpower"] = self.tx_power()
-         d["rxpower"] = self.rx_power()
+      if self.is_available():
+         d["present"] = True
+         d["vendor"] = self.vendor()
+         d["model"] = self.model()
+         d["serial"] = self.serial()
+         d["datecode"] = self.datecode()
+         if(self.connector_type() == self.LC_CONNECTOR_TYPE):
+            d["voltage"] = self.voltage()
+            d["temperature"] = self.temperature()
+            d["txbias"] = self.tx_bias()
+            d["txpower"] = self.tx_power()
+            d["rxpower"] = self.rx_power()
+      else:
+         d["present"] = False
 
       return d
