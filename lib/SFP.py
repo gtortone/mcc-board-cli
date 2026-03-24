@@ -176,6 +176,8 @@ class SFP:
       d = {}
       if self.chip_sw is not None:
          d["power"] = self.power_status_str()
+      else:
+         d["power"] = "on"
       if self.is_available():
          d["present"] = True
          d["vendor"] = self.vendor()
