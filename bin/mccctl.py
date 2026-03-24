@@ -141,6 +141,9 @@ class App(cmd2.Cmd):
       None
 
    def sfpport(self, args):
+      if self.mcc.version == 1:
+         print("'sfp port' command not available for MCCv1")
+         return
       if args.command == 'on':
          print(f"turn on SFP {args.num}")
          self.mcc.sfp[args.num].on()
