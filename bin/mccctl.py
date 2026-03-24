@@ -253,10 +253,10 @@ class App(cmd2.Cmd):
       data = []
       net = self.mcc.host.get_network_status()
       for intf, d in net.items():
-         data.append([f"{intf}", d["rx_speed"], d["tx_speed"]]) 
+         data.append([f"{intf}", d["rx_speed"], d["tx_speed"], d["mac"], d["ip"]]) 
 
       print()
-      print(tabulate(data, headers=["network", "rx (Mbit/s)", "tx (Mbit/s)"], tablefmt="simple"))
+      print(tabulate(data, headers=["network", "rx (Mbit/s)", "tx (Mbit/s)", "MAC", "IP"], tablefmt="simple"))
       print()
 
    sw_port_parser.set_defaults(func=swport)
