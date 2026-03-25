@@ -16,6 +16,7 @@ IN_GPIO_LINE = 46    # PLL_LOL PS_MIO46
 # output pin
 OUT_GPIO_BANK = "a0130000.gpio"
 OUT_GPIO_LINE = 2    # PLL_LOCK 
+GTXRST_GPIO_LINE = 3
 
 # led pin
 LED_GPIO_BANK = "a0060000.gpio"   # LED0
@@ -26,6 +27,7 @@ line_in = chip_in.get_line(IN_GPIO_LINE)
 
 chip_out = gpiod.Chip(f"{OUT_GPIO_BANK}")
 line_out = chip_out.get_line(OUT_GPIO_LINE)
+line_gtxrst = chip_out.get_line(GTXRST_GPIO_LINE)
 
 chip_led = gpiod.Chip(f"{LED_GPIO_BANK}")
 line_led = chip_led.get_line(LED_GPIO_LINE)
@@ -35,10 +37,18 @@ line_led = chip_led.get_line(LED_GPIO_LINE)
 line_in.request(consumer="ps_pll_lol", type=gpiod.LINE_REQ_EV_BOTH_EDGES)  # rising + falling
 line_out.request(consumer="pl_pll_lock", type=gpiod.LINE_REQ_DIR_OUT, default_vals=[0])
 line_led.request(consumer="ps_pll_led", type=gpiod.LINE_REQ_DIR_OUT, default_vals=[0])
+line_gtxrst.request(consumer="gtx_rst", type=gpiod.LINE_REQ_DIR_OUT, default_vals=[0])
 
 # init
 line_out.set_value(line_in.get_value())
 line_led.set_value(line_in.get_value())
+
+# reset GTX
+line_gtxrst.set_value(0)
+time.sleep(0.1)
+line_gtxrst.set_value(1)
+time.sleep(0.1)
+line_gtxrst.set_value(0)
 
 poller = select.poll()
 poller.register(line_in.event_get_fd(), select.POLLIN)
