@@ -167,7 +167,7 @@ class App(cmd2.Cmd):
 
    def fpgainfo(self, args):
       ver = self.mcc.fpga.bitstream_version()
-      print(f"release/tag: {ver['release']}, build: {ver['build_date']}/{ver['build_time']}, commit: {ver['commit_date']}/{ver['commit_hash']}")
+      print(f"release/tag: {ver['release']}, build: {ver['build_date']}/{ver['build_time']}, commit: {ver['commit_date']}/{ver['commit_hash']}, variant: {ver['variant']}")
 
    def fpgastatus(self, args):
       table = []

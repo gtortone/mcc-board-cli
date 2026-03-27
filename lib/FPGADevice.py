@@ -149,8 +149,15 @@ class FPGADevice:
          str(int(value[4:8]))
       ))
       
+      variant = ""
+      value = int(hex(self.read_register(6)), 16)
+      if value == 0x10:
+         variant = "AutoSync" 
+      elif value == 0x20:
+         variant = "TDM" 
 
       return { 
+         "variant": variant,
          "build_date": build_date, 
          "build_time": build_time,
          "commit_date": commit_date,
