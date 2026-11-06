@@ -1,7 +1,9 @@
 
 import time
 import gpiod
+from gpiod.line import Direction, Value
 from smbus2 import SMBus
+from lib.gpiochip import open_chip
 
 class I2CSwitch:
 
@@ -11,18 +13,19 @@ class I2CSwitch:
       self.i2c_addr = i2c_addr
       self.bus = SMBus(i2c_bus)
       if (chip is not None and line is not None):
-         self.chip = gpiod.Chip(chip)
+         self.chip = open_chip(chip)
          self.pin = line
       else:
          self.chip = self.line = None
 
    def reset(self):
       if self.chip is not None:
-         self.line = self.chip.get_line(self.pin)
-         self.line.request(consumer="i2cmux_rst", type=gpiod.LINE_REQ_DIR_OUT)
-         self.line.set_value(0)
+         self.line = self.chip.request_lines(
+            consumer="i2cmux_rst",
+            config={self.pin: gpiod.LineSettings(direction=Direction.OUTPUT)})
+         self.line.set_value(self.pin, Value.INACTIVE)
          time.sleep(0.1)
-         self.line.set_value(1)
+         self.line.set_value(self.pin, Value.ACTIVE)
          self.line.release()
 
    def select(self, channel):

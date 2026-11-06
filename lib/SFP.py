@@ -1,6 +1,8 @@
 
 import gpiod
+from gpiod.line import Direction, Value
 from smbus2 import SMBus
+from lib.gpiochip import open_chip
 
 class SFP:
 
@@ -23,14 +25,14 @@ class SFP:
       self.bus = SMBus(i2c_bus)
 
       if (chip_sw is not None and line_sw is not None):
-         self.chip_sw = gpiod.Chip(chip_sw)
+         self.chip_sw = open_chip(chip_sw)
          self.line_sw = line_sw
       else:
          self.chip_sw = self.line_sw = None
    
       # flags order: TXF, LOS, TXD, MOD      
       if (chip_flags is not None and line_flags is not None):
-         self.chip_flags = gpiod.Chip(chip_flags)
+         self.chip_flags = open_chip(chip_flags)
          self.line_flags = line_flags
       else:
          self.chip_flags = self.line_flags = None
@@ -41,23 +43,26 @@ class SFP:
 
    def on(self):
       if self.chip_sw is not None:
-         line = self.chip_sw.get_line(self.line_sw) 
-         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
-         line.set_value(1)
-         line.release() 
+         line = self.chip_sw.request_lines(
+            consumer="sfp",
+            config={self.line_sw: gpiod.LineSettings(direction=Direction.AS_IS)})
+         line.set_value(self.line_sw, Value.ACTIVE)
+         line.release()
 
    def off(self):
       if self.chip_sw is not None:
-         line = self.chip_sw.get_line(self.line_sw) 
-         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
-         line.set_value(0)
-         line.release() 
+         line = self.chip_sw.request_lines(
+            consumer="sfp",
+            config={self.line_sw: gpiod.LineSettings(direction=Direction.AS_IS)})
+         line.set_value(self.line_sw, Value.INACTIVE)
+         line.release()
 
    def power_status(self):
       if self.chip_sw is not None:
-         line = self.chip_sw.get_line(self.line_sw)
-         line.request(consumer="sfp", type=gpiod.LINE_REQ_DIR_AS_IS)
-         value = line.get_value()
+         line = self.chip_sw.request_lines(
+            consumer="sfp",
+            config={self.line_sw: gpiod.LineSettings(direction=Direction.AS_IS)})
+         value = 1 if line.get_value(self.line_sw) == Value.ACTIVE else 0
          line.release()
          return value
       return None
@@ -66,9 +71,11 @@ class SFP:
       if self.chip_flags is not None:
          flags = []
          for i in range(4):
-            line = self.chip_flags.get_line(self.line_flags[i])
-            line.request(consumer="sfp_flag", type=gpiod.LINE_REQ_DIR_AS_IS)
-            flags.append(line.get_value())
+            offset = self.line_flags[i]
+            line = self.chip_flags.request_lines(
+               consumer="sfp_flag",
+               config={offset: gpiod.LineSettings(direction=Direction.AS_IS)})
+            flags.append(1 if line.get_value(offset) == Value.ACTIVE else 0)
             line.release()
             return flags
       return None

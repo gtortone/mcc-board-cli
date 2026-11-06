@@ -1,7 +1,9 @@
 
 import gpiod
+from gpiod.line import Direction, Value
 import time
 from smbus2 import SMBus
+from lib.gpiochip import open_chip
 
 class POEController:
 
@@ -66,7 +68,7 @@ class POEController:
          self.portmap = portmap
 
       if (chip_sw is not None and line_sw is not None):
-         self.chip_sw = gpiod.Chip(chip_sw)
+         self.chip_sw = open_chip(chip_sw)
          self.line_sw = line_sw
       else:
          self.chip_sw = self.line_sw = None
@@ -75,11 +77,12 @@ class POEController:
 
       # release reset and power off POE lines
       #if self.chip_sw is not None:
-      #   line = self.chip_sw.get_line(self.line_sw)
-      #   line.request(consumer="poe_rst", type=gpiod.LINE_REQ_DIR_AS_IS)
-      #   if line.get_value() == 0:
+      #   line = self.chip_sw.request_lines(
+      #      consumer="poe_rst",
+      #      config={self.line_sw: gpiod.LineSettings(direction=Direction.AS_IS)})
+      #   if line.get_value(self.line_sw) == Value.INACTIVE:
       #      start = time.time()
-      #      line.set_value(1)
+      #      line.set_value(self.line_sw, Value.ACTIVE)
 
       #      while (time.time() - start) < 1:
       #         try:
