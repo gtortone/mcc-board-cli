@@ -100,12 +100,20 @@ class FPGADevice:
             out.append(d)
       return out 
 
-   def get_timing_status(self):
+   def get_timing_status(self, shortkeys=False):
       value = self.read_register(10);
+      v1 = bool(value & (1 << 8))
+      v2 = bool(value & (1 << 4))
+      v3 = bool(value & 1)
       data = {}
-      data['MCC-MCC timing link locked'] = bool(value & (1 << 8))
-      data['Si5345 PLL locked'] = bool(value & (1 << 4))
-      data['TDM-MCC timing link locked'] = bool(value & 1)
+      if shortkeys:
+         data['mcc_mcc_locked'] = v1
+         data['pll_locked'] = v2
+         data['tdm_mcc_locked'] = v3
+      else:
+         data['MCC-MCC timing link locked'] = v1
+         data['Si5345 PLL locked'] = v2
+         data['TDM-MCC timing link locked'] = v3
       return data
 
    def bitstream_version(self):
